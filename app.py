@@ -26,7 +26,7 @@ def get_tarefas():
     
     resultados = cursor.fetchall()
     if not resultados:
-        return jsonify([]), 404
+        return jsonify([]), 200
     
     tarefas = [{"id": tarefa[0], "titulo": tarefa[1], "descricao": tarefa[2]} for tarefa in resultados]
     return jsonify(tarefas), 200 
@@ -49,6 +49,25 @@ def adiciona_tarefa():
 
     return jsonify({"menssagem": "Tarefa adicionada com sucesso"}), 201
     
+
+
+@app.route("/tarefas/<int:id>", methods=["PUT"])
+def edita_tarefa(id):
+    dados = request.json 
+
+    conn = conectar_db()
+    if conn is None: 
+        return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
+    
+    cursor = conn.cursor()
+    sql_command = "UPDATE tarefas SET titulo=?, descricao=? WHERE id=?"
+    cursor.execute(sql_command, (dados.get("titulo"), dados.get("descricao"), id))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"messagem": "Tarefa atualizada com sucesso"}), 200 
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
