@@ -14,11 +14,11 @@ def conectar_db():
 
 
 @app.route("/tarefas", methods=["GET"])
-def get_tarefas():
+def get_all_tarefas():
 
     conn = conectar_db()
     if conn is None: 
-        return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
+        return jsonify({"erro": "Erro ao conectar com o banco de dados"}), 500 
     
     cursor = conn.cursor()
     sql_command = "SELECT t.* FROM tarefas t"
@@ -39,7 +39,7 @@ def adiciona_tarefa():
 
     conn = conectar_db()
     if conn is None: 
-        return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
+        return jsonify({"erro": "Erro ao conectar com o banco de dados"}), 500 
     
     cursor = conn.cursor()
     sql_command = "INSERT INTO tarefas (titulo, descricao) VALUES (?, ?)"
@@ -50,6 +50,23 @@ def adiciona_tarefa():
     return jsonify({"menssagem": "Tarefa adicionada com sucesso"}), 201
     
 
+@app.route("/tarefas/<int:id>", methods=["GET"])
+def get_tarefa(id): 
+    conn = conectar_db()
+    if conn is None: 
+        return jsonify({"erro":"Erro ao conectar com o banco de dados"}), 500
+    
+    cursor = conn.cursor()
+    sql_command = "SELECT * FROM tarefas WHERE id=?"
+    cursor.execute(sql_command, (id, ))
+
+    resultado = cursor.fetchone()
+    if not resultado:
+        return jsonify([]), 200 
+    
+    tarefa = [{"id": resultado[0], "titulo": resultado[1], "descricao":resultado[2]}]
+    return jsonify(tarefa), 200 
+
 
 @app.route("/tarefas/<int:id>", methods=["PUT"])
 def edita_tarefa(id):
@@ -57,7 +74,7 @@ def edita_tarefa(id):
 
     conn = conectar_db()
     if conn is None: 
-        return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
+        return jsonify({"erro": "Erro ao conectar com o banco de dados"}), 500 
     
     cursor = conn.cursor()
     sql_command = "UPDATE tarefas SET titulo=?, descricao=? WHERE id=?"
