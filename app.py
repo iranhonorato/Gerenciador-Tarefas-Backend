@@ -47,7 +47,7 @@ def adiciona_tarefa():
     conn.commit()
     conn.close()
 
-    return jsonify({"menssagem": "Tarefa adicionada com sucesso"}), 201
+    return jsonify({"mensagem": "Tarefa adicionada com sucesso"}), 201
     
 
 @app.route("/tarefas/<int:id>", methods=["GET"])
@@ -68,6 +68,7 @@ def get_tarefa(id):
     return jsonify(tarefa), 200 
 
 
+
 @app.route("/tarefas/<int:id>", methods=["PUT"])
 def edita_tarefa(id):
     dados = request.json 
@@ -82,9 +83,29 @@ def edita_tarefa(id):
     conn.commit()
     conn.close()
 
-    return jsonify({"messagem": "Tarefa atualizada com sucesso"}), 200 
+    return jsonify({"mensagem": "Tarefa atualizada com sucesso"}), 200 
     
 
+
+
+@app.route("/tarefas/<int:id>", methods=["DELETE"])
+def deleta_tarefa(id): 
+
+    conn = conectar_db()
+    if conn is None: 
+        return jsonify({"erro": "Erro ao conectar com o banco de dados"}), 500 
+    
+    cursor = conn.cursor()
+    sql_command = "DELETE FROM tarefas WHERE id=?"
+    cursor.execute(sql_command, (id, ))
+    conn.commit()
+
+    if cursor.rowcount == 0:
+        conn.close()
+        return jsonify({"erro": "Tarefa não encontrada"}), 404
+
+    return jsonify({"mensagem": "Tarefa deletada com sucesso"}), 200 
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
