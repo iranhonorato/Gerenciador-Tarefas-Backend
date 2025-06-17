@@ -21,7 +21,7 @@ def get_tarefas():
         return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
     
     cursor = conn.cursor()
-    sql_command = "SELECT * FROM tarefas"
+    sql_command = "SELECT t.* FROM tarefas t"
     cursor.execute(sql_command)
     
     resultados = cursor.fetchall()
@@ -31,6 +31,24 @@ def get_tarefas():
     tarefas = [{"id": tarefa[0], "titulo": tarefa[1], "descricao": tarefa[2]} for tarefa in resultados]
     return jsonify(tarefas), 200 
 
+
+@app.route("/tarefas", methods=["POST"])
+def adiciona_tarefa():
+
+    dados = request.json 
+
+    conn = conectar_db()
+    if conn is None: 
+        return jsonify({"error": "Erro ao conectar com o banco de dados"}), 500 
+    
+    cursor = conn.cursor()
+    sql_command = "INSERT INTO tarefas (titulo, descricao) VALUES (?, ?)"
+    cursor.execute(sql_command, (dados.get("titulo"), dados.get("descricao")))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"menssagem": "Tarefa adicionada com sucesso"}), 201
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
